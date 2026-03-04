@@ -7,4 +7,8 @@ RUN npm ci --omit=dev
 
 COPY . .
 
-CMD ["node", "sync.mjs", "sync"]
+# Run sync once at startup, then daily at 3:00 AM via crond
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
