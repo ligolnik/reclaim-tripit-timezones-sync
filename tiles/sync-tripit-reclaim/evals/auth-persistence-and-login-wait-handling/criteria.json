@@ -1,0 +1,46 @@
+{
+  "context": "Tests whether the agent documents the correct authentication behavior: .auth/ directory for session persistence, 5-minute login wait, visible browser, 360000ms minimum timeout, and ~1-2 minute runtime.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Auth directory documented",
+      "max_score": 15,
+      "description": "auth-guide.md mentions that login sessions are stored in the '.auth/' directory, allowing them to persist across runs"
+    },
+    {
+      "name": "Login wait duration",
+      "max_score": 15,
+      "description": "auth-guide.md states that if login is required, the script will wait up to 5 minutes for the user to log in manually"
+    },
+    {
+      "name": "Browser visible behavior",
+      "max_score": 12,
+      "description": "auth-guide.md mentions that the browser opens visibly (not headless), so the user can see and interact with the login screen"
+    },
+    {
+      "name": "Expected runtime",
+      "max_score": 10,
+      "description": "auth-guide.md mentions that the sync takes approximately 1-2 minutes to complete under normal conditions"
+    },
+    {
+      "name": "Timeout value correct",
+      "max_score": 20,
+      "description": "run-with-timeout.sh or a comment within it specifies a minimum timeout of 360000ms (or 6 minutes) for running the sync via a bash tool or framework"
+    },
+    {
+      "name": "Correct project path in script",
+      "max_score": 12,
+      "description": "run-with-timeout.sh contains the path /Users/jbaruch/Projects/reclaim-tripit-timezones-sync (exact match)"
+    },
+    {
+      "name": "Correct sync command in script",
+      "max_score": 8,
+      "description": "run-with-timeout.sh uses 'npm run sync' as the command to execute"
+    },
+    {
+      "name": "Subsequent run auth behavior",
+      "max_score": 8,
+      "description": "auth-guide.md explains that once logged in, subsequent runs will reuse the saved session and not require login again (due to .auth/ persistence)"
+    }
+  ]
+}

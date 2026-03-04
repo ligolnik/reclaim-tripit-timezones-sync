@@ -1,0 +1,41 @@
+{
+  "context": "Tests whether the agent correctly documents the error recovery workflow: checking terminal output, inspecting the screenshots/ directory for auto-captured error screenshots, re-running npm run sync to start fresh, and verifying success via Reclaim Settings > Hours.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Check terminal output",
+      "max_score": 10,
+      "description": "troubleshooting-guide.md or failure-checklist.md instructs checking terminal output to identify which timezone failed and why"
+    },
+    {
+      "name": "Screenshots directory",
+      "max_score": 20,
+      "description": "At least one output file explicitly mentions checking the 'screenshots/' directory for automatically captured error screenshots"
+    },
+    {
+      "name": "Re-run to recover",
+      "max_score": 15,
+      "description": "At least one output file instructs re-running 'npm run sync' as the recovery step (not a partial fix or manual edit)"
+    },
+    {
+      "name": "Fresh start on re-run",
+      "max_score": 15,
+      "description": "At least one output file explains that re-running npm run sync starts fresh — it deletes remaining entries and re-adds all of them"
+    },
+    {
+      "name": "Destructive operation awareness",
+      "max_score": 15,
+      "description": "At least one output file acknowledges that the sync is destructive — it deletes ALL existing Reclaim travel timezone entries before adding new ones"
+    },
+    {
+      "name": "Verify in Reclaim UI",
+      "max_score": 15,
+      "description": "troubleshooting-guide.md includes a verification step that checks Reclaim Settings > Hours to confirm all entries were added correctly"
+    },
+    {
+      "name": "Correct recovery command path",
+      "max_score": 10,
+      "description": "The recovery command in any output file uses the correct project path /Users/jbaruch/Projects/reclaim-tripit-timezones-sync when showing the npm run sync command"
+    }
+  ]
+}

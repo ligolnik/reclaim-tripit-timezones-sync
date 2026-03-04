@@ -1,0 +1,11 @@
+{
+  "name": "jbaruch/sync-tripit-reclaim",
+  "version": "0.1.0",
+  "summary": "Sync travel timezone data from TripIt trip itineraries to Reclaim.ai travel timezone settings, ensuring accurate scheduling across time zones.",
+  "private": true,
+  "skills": {
+    "sync-tripit-reclaim": {
+      "path": "skills/sync-tripit-reclaim/SKILL.md"
+    }
+  }
+}

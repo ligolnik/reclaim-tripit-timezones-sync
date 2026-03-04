@@ -1,0 +1,16 @@
+{
+  "name": "reclaim-tripit-timezones-sync",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Sync travel timezones from TripIt to Reclaim.ai",
+  "scripts": {
+    "discover-tripit": "node sync.mjs discover-tripit",
+    "discover-reclaim": "node sync.mjs discover-reclaim",
+    "dry-run": "node sync.mjs dry-run",
+    "sync": "node sync.mjs sync"
+  },
+  "dependencies": {
+    "city-timezones": "^1.3.3",
+    "playwright": "^1.49.0"
+  }
+}

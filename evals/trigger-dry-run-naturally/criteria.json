@@ -1,0 +1,31 @@
+{
+  "context": "Tests whether the agent correctly identifies 'don't change anything' as a dry-run request and uses 'npm run dry-run' instead of 'npm run sync'.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Runs npm run dry-run",
+      "max_score": 30,
+      "description": "The agent executes 'npm run dry-run' — NOT 'npm run sync' or any other command"
+    },
+    {
+      "name": "Correct project directory",
+      "max_score": 20,
+      "description": "The command is run from or references /Users/jbaruch/Projects/reclaim-tripit-timezones-sync"
+    },
+    {
+      "name": "Adequate timeout",
+      "max_score": 15,
+      "description": "The bash command is invoked with a timeout of at least 360000ms"
+    },
+    {
+      "name": "Does not modify Reclaim",
+      "max_score": 20,
+      "description": "The agent does NOT also run 'npm run sync' — only the dry-run is executed"
+    },
+    {
+      "name": "Reports preview results",
+      "max_score": 15,
+      "description": "After the command completes, the agent summarizes the timezone mappings that were previewed"
+    }
+  ]
+}

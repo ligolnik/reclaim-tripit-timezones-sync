@@ -1,0 +1,51 @@
+{
+  "context": "Tests whether the agent uses the correct discovery npm commands ('npm run discover-tripit' and 'npm run discover-reclaim') with the exact project directory path for each service's diagnostic script.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "TripIt project path",
+      "max_score": 10,
+      "description": "debug-tripit.sh contains the path /Users/jbaruch/Projects/reclaim-tripit-timezones-sync (exact match)"
+    },
+    {
+      "name": "TripIt discover command",
+      "max_score": 20,
+      "description": "debug-tripit.sh uses 'npm run discover-tripit' — not 'npm run sync', 'npm run debug', or any other command"
+    },
+    {
+      "name": "TripIt cd before command",
+      "max_score": 8,
+      "description": "debug-tripit.sh navigates (cd) into the project directory before or as part of running the npm command"
+    },
+    {
+      "name": "Reclaim project path",
+      "max_score": 10,
+      "description": "debug-reclaim.sh contains the path /Users/jbaruch/Projects/reclaim-tripit-timezones-sync (exact match)"
+    },
+    {
+      "name": "Reclaim discover command",
+      "max_score": 20,
+      "description": "debug-reclaim.sh uses 'npm run discover-reclaim' — not 'npm run sync', 'npm run debug', or any other command"
+    },
+    {
+      "name": "Reclaim cd before command",
+      "max_score": 8,
+      "description": "debug-reclaim.sh navigates (cd) into the project directory before or as part of running the npm command"
+    },
+    {
+      "name": "Page structure purpose",
+      "max_score": 12,
+      "description": "debug-runbook.md explains that these scripts dump the page/DOM structure seen by the automation tool (not just 'run diagnostics')"
+    },
+    {
+      "name": "When to use each",
+      "max_score": 10,
+      "description": "debug-runbook.md distinguishes when to use the TripIt diagnostic vs the Reclaim diagnostic (e.g., based on which side of the sync is failing)"
+    },
+    {
+      "name": "Screenshots directory output",
+      "max_score": 12,
+      "description": "At least one output file mentions that discovery dumps artifacts (screenshots, HTML, DOM outline) into the 'screenshots/' directory"
+    }
+  ]
+}

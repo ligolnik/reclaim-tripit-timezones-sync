@@ -1,0 +1,31 @@
+{
+  "context": "Tests whether the agent correctly uses 'npm run dry-run' (not 'npm run sync') when asked for a preview mode, and navigates to the correct project directory. Also checks that the agent understands the dry-run does not make changes.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Correct project path",
+      "max_score": 15,
+      "description": "preview.sh contains the path /Users/jbaruch/Projects/reclaim-tripit-timezones-sync (exact match)"
+    },
+    {
+      "name": "Dry-run command used",
+      "max_score": 25,
+      "description": "preview.sh uses 'npm run dry-run' — NOT 'npm run sync', 'npm run preview', or any other command variant"
+    },
+    {
+      "name": "cd before command",
+      "max_score": 15,
+      "description": "preview.sh changes directory into the project path before or as part of running the npm command"
+    },
+    {
+      "name": "No-changes explanation",
+      "max_score": 20,
+      "description": "preview-guide.md or a comment in preview.sh explicitly states that this mode makes NO changes to Reclaim (it is a preview only)"
+    },
+    {
+      "name": "Distinction from sync",
+      "max_score": 20,
+      "description": "preview-guide.md explains how the preview mode differs from the full sync (e.g., non-destructive, view only, no entries deleted or created)"
+    }
+  ]
+}
