@@ -1,5 +1,8 @@
 FROM node:22-alpine
 
+ENV TRIPIT_ICAL_URL=""
+ENV RECLAIM_API_TOKEN=""
+
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
