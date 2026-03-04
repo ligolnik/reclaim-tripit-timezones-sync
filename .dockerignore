@@ -1,0 +1,11 @@
+node_modules
+.auth
+.env
+.git
+.claude
+.codex
+.tessl
+.github
+screenshots
+evals
+tiles
