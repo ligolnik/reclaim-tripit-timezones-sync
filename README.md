@@ -27,10 +27,9 @@ Parses your TripIt iCal feed to extract flight arrival timezones, builds timezon
 
 ### 2. Get your Reclaim.ai API token
 
-1. Go to [app.reclaim.ai](https://app.reclaim.ai) and log in
-2. Navigate to **Settings** → **Integrations** → **API**
-3. Generate a new API key
-4. Copy the token
+1. Go to [app.reclaim.ai/settings/developer](https://app.reclaim.ai/settings/developer)
+2. Generate a new API key
+3. Copy the token
 
 ### 3. Run with Docker
 
