@@ -73,6 +73,8 @@ aws ssm put-parameter \
   --region $AWS_REGION
 ```
 
+> **Note:** If you are re-running these commands to update credentials, add the `--overwrite` flag to each `put-parameter` call. Without it, AWS will reject the request because the parameter already exists.
+
 ### 4. Create CloudWatch log group
 
 ```bash
@@ -322,6 +324,54 @@ Sync complete!
 - **CloudWatch Logs:** Negligible with 30-day retention
 - **ECR:** Free tier covers 500 MB/month
 
+## Updating the image and monitoring
+
+### Pushing an updated image
+
+When you update the application code, rebuild and push the new image:
+
+```bash
+docker build -t reclaim-tripit-sync .
+
+docker tag reclaim-tripit-sync:latest \
+  $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/reclaim-tripit-sync:latest
+
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/reclaim-tripit-sync:latest
+```
+
+No ECS changes are needed — the task definition references the `:latest` tag, so ECS will pull the new image on the next scheduled run.
+
+### Setting up a CloudWatch alarm for task failures
+
+Create an alarm that notifies you when a scheduled sync fails:
+
+```bash
+# Create an SNS topic for notifications
+aws sns create-topic --name reclaim-tripit-sync-failures --region $AWS_REGION
+aws sns subscribe \
+  --topic-arn arn:aws:sns:$AWS_REGION:$AWS_ACCOUNT_ID:reclaim-tripit-sync-failures \
+  --protocol email \
+  --notification-endpoint 'YOUR_EMAIL@example.com' \
+  --region $AWS_REGION
+
+# Create a CloudWatch alarm on the ECS "task failed" metric
+aws cloudwatch put-metric-alarm \
+  --alarm-name reclaim-tripit-sync-task-failure \
+  --namespace AWS/ECS \
+  --metric-name TaskFailure \
+  --dimensions Name=ClusterName,Value=reclaim-tripit-sync \
+  --statistic Sum \
+  --period 86400 \
+  --threshold 1 \
+  --comparison-operator GreaterThanOrEqualToThreshold \
+  --evaluation-periods 1 \
+  --alarm-actions arn:aws:sns:$AWS_REGION:$AWS_ACCOUNT_ID:reclaim-tripit-sync-failures \
+  --treat-missing-data notBreaching \
+  --region $AWS_REGION
+```
+
+Confirm the subscription by clicking the link in the email you receive.
+
 ## IAM permissions
 
 Your AWS user/role needs the following permissions to deploy:
@@ -333,7 +383,7 @@ Your AWS user/role needs the following permissions to deploy:
 - `events:*` — create scheduled rules
 - `ec2:Describe*` — look up VPC/subnet/security group info
 
-Or attach `AdministratorAccess` temporarily for the initial setup.
+Create a scoped IAM policy containing only the permissions listed above and attach it to your deployment user/role. Avoid using `AdministratorAccess` — even temporarily — as it grants far more access than needed and risks accidental changes to unrelated resources.
 
 ## Cleanup
 
@@ -344,8 +394,11 @@ To remove all AWS resources:
 aws events remove-targets --rule reclaim-tripit-sync-daily --ids reclaim-tripit-sync-target --region $AWS_REGION
 aws events delete-rule --name reclaim-tripit-sync-daily --region $AWS_REGION
 
-# Deregister task definition
-aws ecs deregister-task-definition --task-definition reclaim-tripit-sync:1 --region $AWS_REGION
+# Deregister all task definition revisions
+# List all revisions, then deregister each one:
+for arn in $(aws ecs list-task-definitions --family-prefix reclaim-tripit-sync --query 'taskDefinitionArns[]' --output text --region $AWS_REGION); do
+  aws ecs deregister-task-definition --task-definition "$arn" --region $AWS_REGION
+done
 
 # Delete ECS cluster
 aws ecs delete-cluster --cluster reclaim-tripit-sync --region $AWS_REGION

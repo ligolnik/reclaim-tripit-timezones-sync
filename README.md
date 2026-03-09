@@ -68,6 +68,10 @@ On the NAS, load and run:
 docker load < tripit-reclaim-sync.tar.gz
 ```
 
+### Alternative: Deploy on AWS
+
+For a serverless deployment that runs as a scheduled ECS Fargate task (~$0.01/month), see [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md).
+
 ## Running locally (without Docker)
 
 ```bash
