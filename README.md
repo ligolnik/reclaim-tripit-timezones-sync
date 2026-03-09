@@ -2,16 +2,17 @@
 
 Automatically syncs travel timezones from your TripIt trips to [Reclaim.ai](https://reclaim.ai), so your scheduling links, habits, and working hours all adjust to wherever you're traveling.
 
-Parses your TripIt iCal feed to extract flight arrival timezones, builds timezone segments for each trip, and pushes them to Reclaim's travel timezone settings via REST API. Runs daily in a Docker container.
+Parses your TripIt iCal feed to extract timezones from flights and hotel stays, builds timezone segments for each trip, and pushes them to Reclaim's travel timezone settings via REST API. Runs daily in a Docker container. Optionally notifies via Telegram when changes are detected.
 
 ## How it works
 
 1. Fetches your TripIt iCal calendar feed
-2. Identifies trip-level events (date ranges) and flight events (arrival timezones)
-3. Extracts timezone from each flight's arrival description (e.g., `2:10 PM CEST\nArrive Paris (CDG)`)
-4. For trips without flights, falls back to geo-coordinate lookup
+2. Identifies trip-level events (date ranges), flights, and hotel/lodging stays
+3. Builds timezone segments using a priority chain: flights → hotel stays → trip-level geo-coordinates
+4. For hotels, disambiguates timezone abbreviations (CST, IST, EST) using the location's country
 5. Filters to future segments, deduplicates consecutive same-timezone periods
-6. Clears existing Reclaim travel timezone entries and creates new ones
+6. Skips sync if nothing changed; otherwise clears existing Reclaim entries and creates new ones
+7. Sends a Telegram notification when timezone overrides change (if configured)
 
 ## Setup
 
