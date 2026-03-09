@@ -89,11 +89,21 @@ docker load < tripit-reclaim-sync.tar.gz
 
 For a serverless deployment that runs as a scheduled ECS Fargate task (~$0.01/month), see [AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md).
 
+## Telegram notifications (optional)
+
+Get notified when timezone overrides change. To set up:
+
+1. Create a bot via [@BotFather](https://t.me/BotFather) and copy the bot token
+2. Send any message to your bot, then get your chat ID from `https://api.telegram.org/bot<TOKEN>/getUpdates`
+3. Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` environment variables
+
+When configured, you'll receive a message listing the new timezone overrides whenever the sync detects changes. If the variables are not set, notifications are silently skipped.
+
 ## Environment variables
 
 | Variable | Required | Description |
 |---|---|---|
 | `TRIPIT_ICAL_URL` | Yes | Your private TripIt iCal feed URL |
 | `RECLAIM_API_TOKEN` | Yes | Reclaim.ai API token |
-| `TELEGRAM_BOT_TOKEN` | No | Telegram bot token for change notifications (from [@BotFather](https://t.me/BotFather)) |
+| `TELEGRAM_BOT_TOKEN` | No | Telegram bot token for change notifications |
 | `TELEGRAM_CHAT_ID` | No | Telegram chat ID to send notifications to |
