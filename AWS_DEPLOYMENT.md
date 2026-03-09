@@ -17,6 +17,7 @@ EventBridge Rule (cron: daily 3 AM UTC)
       → Injects secrets from SSM Parameter Store
       → Runs: node sync.mjs sync
       → Logs to CloudWatch
+      → (Optional) Notifies via Telegram and/or SNS email
       → Container exits (no ongoing cost)
 ```
 
@@ -121,7 +122,7 @@ aws iam put-role-policy \
   }'
 ```
 
-**Task role** (used by the container at runtime — minimal since the app only calls external APIs):
+**Task role** (used by the container at runtime — needs SNS publish if using SNS notifications):
 
 ```bash
 aws iam create-role \
@@ -132,6 +133,19 @@ aws iam create-role \
       "Effect": "Allow",
       "Principal": {"Service": "ecs-tasks.amazonaws.com"},
       "Action": "sts:AssumeRole"
+    }]
+  }'
+
+# Optional: Allow SNS publish for email notifications (skip if not using SNS)
+aws iam put-role-policy \
+  --role-name reclaim-tripit-sync-task-role \
+  --policy-name SNSPublishAccess \
+  --policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Action": "sns:Publish",
+      "Resource": "arn:aws:sns:'$AWS_REGION':'$AWS_ACCOUNT_ID':reclaim-tripit-sync"
     }]
   }'
 ```
@@ -184,7 +198,27 @@ aws ecs create-cluster \
   --region $AWS_REGION
 ```
 
-### 7. Register task definition
+### 7. (Optional) Set up SNS email notifications
+
+If you want email notifications when the sync makes changes (in addition to or instead of Telegram):
+
+```bash
+# Create SNS topic
+aws sns create-topic \
+  --name reclaim-tripit-sync \
+  --region $AWS_REGION
+
+# Subscribe your email
+aws sns subscribe \
+  --topic-arn arn:aws:sns:$AWS_REGION:$AWS_ACCOUNT_ID:reclaim-tripit-sync \
+  --protocol email \
+  --notification-endpoint your-email@example.com \
+  --region $AWS_REGION
+```
+
+> **Important:** Check your inbox and confirm the subscription before testing.
+
+### 8. Register task definition
 
 The `command` override bypasses the Dockerfile's built-in cron entrypoint, running a single sync and exiting:
 
@@ -204,6 +238,12 @@ aws ecs register-task-definition \
       "image": "'$AWS_ACCOUNT_ID'.dkr.ecr.'$AWS_REGION'.amazonaws.com/reclaim-tripit-sync:latest",
       "command": ["node", "sync.mjs", "sync"],
       "essential": true,
+      "environment": [
+        {
+          "name": "SNS_TOPIC_ARN",
+          "value": "arn:aws:sns:'$AWS_REGION':'$AWS_ACCOUNT_ID':reclaim-tripit-sync"
+        }
+      ],
       "secrets": [
         {
           "name": "TRIPIT_ICAL_URL",
@@ -226,7 +266,7 @@ aws ecs register-task-definition \
   ]'
 ```
 
-### 8. Set up networking
+### 9. Set up networking
 
 Identify your default VPC, a subnet, and the default security group:
 
@@ -243,7 +283,7 @@ SG_ID=$(aws ec2 describe-security-groups --filters Name=vpc-id,Values=$VPC_ID Na
 echo "VPC=$VPC_ID SUBNET=$SUBNET_ID SG=$SG_ID"
 ```
 
-### 9. Create EventBridge scheduled rule
+### 10. Create EventBridge scheduled rule
 
 ```bash
 aws events put-rule \
@@ -275,7 +315,7 @@ aws events put-targets \
   }]'
 ```
 
-### 10. Test it
+### 11. Test it
 
 Run a one-off task to verify everything works:
 
@@ -323,6 +363,7 @@ Sync complete!
 - **SSM Parameter Store:** Free (standard parameters)
 - **CloudWatch Logs:** Negligible with 30-day retention
 - **ECR:** Free tier covers 500 MB/month
+- **SNS:** Free tier covers 1,000 email notifications/month
 
 ## Updating the image and monitoring
 
@@ -413,7 +454,15 @@ aws ssm delete-parameter --name /reclaim-tripit-sync/RECLAIM_API_TOKEN --region 
 # Delete CloudWatch log group
 aws logs delete-log-group --log-group-name /ecs/reclaim-tripit-sync --region $AWS_REGION
 
+# Delete SNS topic and subscriptions (if configured)
+TOPIC_ARN=arn:aws:sns:$AWS_REGION:$AWS_ACCOUNT_ID:reclaim-tripit-sync
+aws sns list-subscriptions-by-topic --topic-arn $TOPIC_ARN --region $AWS_REGION \
+  --query 'Subscriptions[].SubscriptionArn' --output text | \
+  xargs -n1 aws sns unsubscribe --subscription-arn
+aws sns delete-topic --topic-arn $TOPIC_ARN --region $AWS_REGION
+
 # Delete IAM roles and policies
+aws iam delete-role-policy --role-name reclaim-tripit-sync-task-role --policy-name SNSPublishAccess 2>/dev/null || true
 aws iam detach-role-policy --role-name reclaim-tripit-sync-execution-role \
   --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
 aws iam delete-role-policy --role-name reclaim-tripit-sync-execution-role --policy-name SSMParameterAccess
