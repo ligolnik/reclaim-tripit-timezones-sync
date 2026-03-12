@@ -15,7 +15,7 @@ import {
   createEntry,
 } from './lib/reclaim.mjs';
 
-import { entriesChanged, sendNotification } from './lib/notify.mjs';
+import { entriesChanged, sendNotification, findOverlaps } from './lib/notify.mjs';
 
 const mode = process.argv[2] || 'dry-run';
 const VALID_MODES = ['dry-run', 'sync'];
@@ -60,6 +60,15 @@ try {
 
   const segments = deduplicateSegments(future);
   console.log(`  ${segments.length} after deduplication`);
+
+  // Check for overlapping trips
+  const overlaps = findOverlaps(future);
+  if (overlaps.length > 0) {
+    console.log(`\n⚠️  OVERLAPPING TRIPS:`);
+    for (const o of overlaps) {
+      console.log(`  ${o.labelA} (→ ${o.endA}) overlaps ${o.labelB} (${o.startB} →)`);
+    }
+  }
 
   // Print summary
   console.log(`\n── Timezone segments ──`);
