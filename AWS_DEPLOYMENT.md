@@ -72,6 +72,25 @@ aws ssm put-parameter \
   --type SecureString \
   --value 'YOUR_RECLAIM_API_TOKEN' \
   --region $AWS_REGION
+
+# Optional: Google Calendar credentials for OOO blocks (see README)
+aws ssm put-parameter \
+  --name /reclaim-tripit-sync/GOOGLE_CLIENT_ID \
+  --type SecureString \
+  --value 'YOUR_GOOGLE_CLIENT_ID' \
+  --region $AWS_REGION
+
+aws ssm put-parameter \
+  --name /reclaim-tripit-sync/GOOGLE_CLIENT_SECRET \
+  --type SecureString \
+  --value 'YOUR_GOOGLE_CLIENT_SECRET' \
+  --region $AWS_REGION
+
+aws ssm put-parameter \
+  --name /reclaim-tripit-sync/GOOGLE_REFRESH_TOKEN \
+  --type SecureString \
+  --value 'YOUR_GOOGLE_REFRESH_TOKEN' \
+  --region $AWS_REGION
 ```
 
 > **Note:** If you are re-running these commands to update credentials, add the `--overwrite` flag to each `put-parameter` call. Without it, AWS will reject the request because the parameter already exists.
@@ -252,6 +271,18 @@ aws ecs register-task-definition \
         {
           "name": "RECLAIM_API_TOKEN",
           "valueFrom": "arn:aws:ssm:'$AWS_REGION':'$AWS_ACCOUNT_ID':parameter/reclaim-tripit-sync/RECLAIM_API_TOKEN"
+        },
+        {
+          "name": "GOOGLE_CLIENT_ID",
+          "valueFrom": "arn:aws:ssm:'$AWS_REGION':'$AWS_ACCOUNT_ID':parameter/reclaim-tripit-sync/GOOGLE_CLIENT_ID"
+        },
+        {
+          "name": "GOOGLE_CLIENT_SECRET",
+          "valueFrom": "arn:aws:ssm:'$AWS_REGION':'$AWS_ACCOUNT_ID':parameter/reclaim-tripit-sync/GOOGLE_CLIENT_SECRET"
+        },
+        {
+          "name": "GOOGLE_REFRESH_TOKEN",
+          "valueFrom": "arn:aws:ssm:'$AWS_REGION':'$AWS_ACCOUNT_ID':parameter/reclaim-tripit-sync/GOOGLE_REFRESH_TOKEN"
         }
       ],
       "logConfiguration": {
